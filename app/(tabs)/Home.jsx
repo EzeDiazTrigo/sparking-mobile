@@ -3,6 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View, Image, SafeAreaView, ScrollVi
 import { useAuth } from '../../src/context/AuthContext';
 import { StatusBar } from 'expo-status-bar';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import TopBar from '../../src/components/TopBar';
 
 export default function Home(){
 
@@ -44,27 +45,7 @@ export default function Home(){
         <View style={styles.topBar}>
 
           <View style={styles.profileSection}>
-
-            <View style={styles.avatarContainer}>
-              <Image
-                source={require('../../assets/Characters-icons/pd7/majin_vegeta.jpg')}
-                style={styles.avatar}
-              />
-            </View>
-
-            <View>
-              <Text style={styles.levelText}>LVL {level}</Text>
-
-              <View style={styles.xpBar}>
-                <View style={styles.xpFill} />
-              </View>
-            </View>
-
-          </View>
-
-          <View style={styles.currencySection}>
-            <Text style={styles.currencyText}>💎 {points}</Text>
-            <Text style={styles.currencyText}>🪙 {zeni}</Text>
+            <TopBar/>
           </View>
 
         </View>
@@ -152,9 +133,9 @@ const styles = StyleSheet.create({
     height: '100%',
   },
 
-  levelText: {
+  UserNameText: {
     color: '#fff',
-    fontSize: 12,
+    fontSize: 18,
     marginBottom: 4,
     letterSpacing: 1,
   },

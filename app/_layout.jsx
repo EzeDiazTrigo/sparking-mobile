@@ -4,33 +4,26 @@ import { AuthProvider, useAuth } from '../src/context/AuthContext';
 
 function RootLayoutNav(){
 
-    const { user } = useAuth()
+    const { user, loading } = useAuth()
     const router = useRouter()
     const segments = useSegments()
-    const navigationRef = useNavigationContainerRef()
-    const [isReady, setIsReady] = useState(false)
-
-    useEffect(() => {
-        if (navigationRef?.isReady()) {
-            setIsReady(true)
-        }
-    }, [navigationRef?.isReady()])
 
     console.log("SEGMENTO: ", segments);
 
     useEffect(() => {
-        if (!isReady) return
+
+        if(loading) return
 
         const estaEnAuth = segments[0] === "(auth)"
 
         if(!user && !estaEnAuth){
-            router.replace('/(tabs)/login')
+            router.replace('/(auth)/Login')
 
         }else if(user && estaEnAuth){
-            router.replace("/(tabs)/home")
+            router.replace("/(tabs)/Home")
         }
 
-    }, [user, segments, isReady])
+    }, [user, segments])
     
     
 

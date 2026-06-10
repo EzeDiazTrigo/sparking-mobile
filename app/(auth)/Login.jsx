@@ -65,10 +65,6 @@ export default function Login() {
             <Text style={styles.buttonText}>INICIAR SESION</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity>
-            <Text style={styles.forgotText}>Olvidaste tu contrasena?</Text>
-          </TouchableOpacity>
-
           <View style={styles.dividerContainer}>
             <View style={styles.dividerLine} />
             <View style={styles.dividerLine} />
