@@ -276,8 +276,34 @@ export default function Selector({ characters = null }) {
     };
 
     const deleteTeam = async (teamId) => {
-        const listaActualizada = teams.filter((team) => team.id !== teamId);
-        await guardarEquipos(listaActualizada);
+        try {
+            const currentUserId = user?.id ?? await getStoredUserId();
+            if (!currentUserId) {
+                console.log('No hay usuario para borrar el equipo');
+                return;
+            }
+
+            const response = await fetch(
+                `https://6a2898d24e1e783349a5aeca.mockapi.io/sp/users/${currentUserId}/team/${teamId}`,
+                {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}`);
+            }
+
+            const listaActualizada = teams.filter((team) => String(team.id) !== String(teamId));
+            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(listaActualizada));
+            setTeams(listaActualizada);
+        } catch (error) {
+            console.log('Error al borrar equipo:', error);
+            const listaActualizada = teams.filter((team) => String(team.id) !== String(teamId));
+            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(listaActualizada)).catch(() => {});
+            setTeams(listaActualizada);
+        }
     };
 
     const handleCancel = () => {
