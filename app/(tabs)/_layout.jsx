@@ -37,6 +37,20 @@ export default function TabsLayout(){
       />
 
       <Tabs.Screen
+        name="TusPersonajes"
+        options={{
+          title: 'Tus personajes',
+          tabBarIcon: ({ color, size }) => (
+            <Feather
+              name="users"
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
         name="Profile"
         options={{
           title: 'Perfil',

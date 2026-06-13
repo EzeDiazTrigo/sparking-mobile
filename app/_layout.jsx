@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Stack, useRouter, useSegments, useNavigationContainerRef } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { AuthProvider, useAuth } from '../src/context/AuthContext';
 
 function RootLayoutNav(){
@@ -31,6 +31,7 @@ function RootLayoutNav(){
     <Stack screenOptions={{ headerShown: false}}>
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(game)"/>
     </Stack>
   )
 }
