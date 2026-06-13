@@ -168,8 +168,13 @@ export default function Selector({ characters = null }) {
         selectedCharacterIds.includes(character.id)
         );
 
+        const lastTeamId = teams.reduce((max, team) => {
+        const numericId = Number.parseInt(String(team.id), 10);
+        return Number.isFinite(numericId) && numericId > max ? numericId : max;
+        }, 0);
+
         const nuevoEquipo = {
-        id: Date.now().toString(),
+        id: String(lastTeamId + 1),
         name: nombre,
         members: selectedCharacters.length,
         characters: selectedCharacters,
