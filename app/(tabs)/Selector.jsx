@@ -13,10 +13,40 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import TopBar from '../../src/components/TopBar';
+import { useAuth } from '../../src/context/AuthContext';
 
 const STORAGE_KEY = 'sparking_teams';
 
+const normalizeTeamFromApi = (entry) => {
+    if (!entry || typeof entry !== 'object') {
+        return null;
+    }
+
+    const candidate = entry?.[0] && typeof entry[0] === 'object'
+        ? entry[0]
+        : entry;
+
+    const characters = Array.isArray(candidate?.characters)
+        ? candidate.characters
+        : (Array.isArray(entry?.characters)
+            ? entry.characters
+            : (Array.isArray(entry?.characteres)
+                ? entry.characteres
+                : []));
+
+    return {
+        ...candidate,
+        ...entry,
+        id: candidate?.id ?? entry?.id,
+        name: candidate?.name ?? entry?.name ?? 'Equipo',
+        members: candidate?.members ?? entry?.members ?? characters.length,
+        characters,
+        status: candidate?.status ?? entry?.status ?? 'Guardado',
+    };
+};
+
 export default function Selector({ characters = null }) {
+    const { user } = useAuth();
     const [teams, setTeams] = useState([]);
     const [teamName, setTeamName] = useState('');
     const [editingId, setEditingId] = useState(null);
@@ -25,41 +55,90 @@ export default function Selector({ characters = null }) {
 
     const personaje1 = {"id":11,"name":"Krillin","ki":"1.000.000","maxKi":"1 Billion","race":"Human","gender":"Male","description":"Amigo cercano de Goku y guerrero valiente, es un personaje del manga y anime de Dragon Ball. Es uno de los principales discípulos de Kame-Sen'nin, Guerrero Z, y el mejor amigo de Son Goku. Es junto a Bulma uno de los personajes de apoyo principales de Dragon Ball, Dragon Ball Z y Dragon Ball Super. Aparece en Dragon Ball GT como personaje secundario. En el Arco de Majin Boo, se retira de las artes marciales, optando por formar una familia, como el esposo de la Androide Número 18 y el padre de Marron.","image":"https://dragonball-api.com/characters/Krilin_Universo7.webp","affiliation":"Z Fighter","deletedAt":null,"originPlanet":{"id":2,"name":"Tierra","isDestroyed":false,"description":"La Tierra también llamado Mundo del Dragón (Dragon World), es el planeta principal donde se desarrolla la serie de Dragon Ball. Se encuentra en el Sistema Solar de la Vía Láctea de las Galaxias del Norte del Universo 7, lugar que supervisa el Kaio del Norte, y tiene su equivalente en el Universo 6. El hogar de los terrícolas y los Guerreros Z. Ha sido atacado en varias ocasiones por enemigos poderosos.","image":"https://dragonball-api.com/planetas/Tierra_Dragon_Ball_Z.webp","deletedAt":null},"transformations":[]}        
     const personaje2 = {"id":6,"name":"Zarbon","ki":"20.000","maxKi":"30.000","race":"Frieza Race","gender":"Male","description":"Zarbon es uno de los secuaces de Freezer y un luchador poderoso.","image":"https://dragonball-api.com/characters/zarbon.webp","affiliation":"Army of Frieza","deletedAt":null,"originPlanet":{"id":4,"name":"Freezer No. 79","isDestroyed":true,"description":"Planeta artificial utilizado por Freezer como base de operaciones y centro de clonación.","image":"https://dragonball-api.com/planetas/PlanetaFreezer.webp","deletedAt":null},"transformations":[{"id":18,"name":"Zarbon Monster","image":"https://dragonball-api.com/transformaciones/zarbon monster.webp","ki":"30.000","deletedAt":null}]}
-    const personaje3 ={"id":7,"name":"Dodoria","ki":"18.000","maxKi":"20.000","race":"Frieza Race","gender":"Male","description":"Dodoria es otro secuaz de Freezer conocido por su brutalidad.","image":"https://dragonball-api.com/characters/dodoria.webp","affiliation":"Army of Frieza","deletedAt":null,"originPlanet":{"id":4,"name":"Freezer No. 79","isDestroyed":true,"description":"Planeta artificial utilizado por Freezer como base de operaciones y centro de clonación.","image":"https://dragonball-api.com/planetas/PlanetaFreezer.webp","deletedAt":null},"transformations":[]}
+    const personaje3 ={"id":2,"name":"Vegeta","ki":"54.000.000","maxKi":"19.84 Septillion","race":"Saiyan","gender":"Male","description":"Príncipe de los Saiyans, inicialmente un villano, pero luego se une a los Z Fighters. A pesar de que a inicios de Dragon Ball Z, Vegeta cumple un papel antagónico, poco después decide rebelarse ante el Imperio de Freeza, volviéndose un aliado clave para los Guerreros Z. Con el paso del tiempo llegaría a cambiar su manera de ser, optando por permanecer y vivir en la Tierra para luchar a su lado contra las inminentes adversidades que superar. Junto con Piccolo, él es de los antiguos enemigos de Goku que ha evolucionando al pasar de ser un villano y antihéroe, a finalmente un héroe a lo largo del transcurso de la historia, convirtiéndose así en el deuteragonista de la serie.","image":"https://dragonball-api.com/characters/vegeta_normal.webp","affiliation":"Z Fighter","deletedAt":null,"originPlanet":{"id":3,"name":"Vegeta","isDestroyed":true,"description":"El planeta Vegeta, conocido como planeta Plant antes del fin de la Guerra Saiyan-tsufruiana en el año 730, es un planeta rocoso ficticio de la serie de manga y anime Dragon Ball y localizado en la Vía Láctea de las Galaxias del Norte del Universo 7 hasta su destrucción a manos de Freezer en los años 737-739. Planeta natal de los Saiyans, destruido por Freezer. Anteriormente conocido como Planeta Plant.","image":"https://dragonball-api.com/planetas/Planeta_Vegeta_en_Dragon_Ball_Super_Broly.webp","deletedAt":null},"transformations":[{"id":7,"name":"Vegeta SSJ","image":"https://dragonball-api.com/transformaciones/vegeta SSJ (2).webp","ki":"330.000.000","deletedAt":null},{"id":8,"name":"Vegeta SSJ2","image":"https://dragonball-api.com/transformaciones/vegeta SSJ2.webp","ki":"24 Billion","deletedAt":null},{"id":9,"name":"Vegeta SSJ4","image":"https://dragonball-api.com/transformaciones/vegeta ssj4.webp","ki":"1.8 Trillion","deletedAt":null},{"id":10,"name":"Vegeta SSJB","image":"https://dragonball-api.com/transformaciones/vegeta SSJB.webp","ki":"100 Quintillion","deletedAt":null},{"id":11,"name":"Vegeta Mega Instinc Evil","image":"https://dragonball-api.com/transformaciones/vegeta mega instinto.webp","ki":"19.84 Septillion","deletedAt":null}]}
     const personaje4 ={"id":16,"name":"Trunks","ki":"50.000.000","maxKi":"37.4 septllion","race":"Saiyan","gender":"Male","description":"Hijo de Vegeta y Bulma. Es un mestizo entre humano terrícola y Saiyano nacido en la Tierra, e hijo de Bulma y Vegeta, el cual es introducido en el Arco de los Androides y Cell. Más tarde en su vida como joven, se termina convirtiendo en un luchador de artes marciales, el mejor amigo de Son Goten y en el hermano mayor de su hermana Bra.","image":"https://dragonball-api.com/characters/Trunks_Buu_Artwork.webp","affiliation":"Z Fighter","deletedAt":null,"originPlanet":{"id":2,"name":"Tierra","isDestroyed":false,"description":"La Tierra también llamado Mundo del Dragón (Dragon World), es el planeta principal donde se desarrolla la serie de Dragon Ball. Se encuentra en el Sistema Solar de la Vía Láctea de las Galaxias del Norte del Universo 7, lugar que supervisa el Kaio del Norte, y tiene su equivalente en el Universo 6. El hogar de los terrícolas y los Guerreros Z. Ha sido atacado en varias ocasiones por enemigos poderosos.","image":"https://dragonball-api.com/planetas/Tierra_Dragon_Ball_Z.webp","deletedAt":null},"transformations":[{"id":26,"name":"Trunks SSJ","image":"https://dragonball-api.com/transformaciones/trunks_ssj-removebg-preview.webp","ki":"905.000.000","deletedAt":null},{"id":27,"name":"Trunks SSJ2","image":"https://dragonball-api.com/transformaciones/trunks ssj2.webp","ki":"18.000.000.000","deletedAt":null},{"id":28,"name":"Trunks SSJ3","image":"https://dragonball-api.com/transformaciones/trunks ssj3.webp","ki":"1.25 Billion","deletedAt":null},{"id":29,"name":"Trunks Rage","image":"https://dragonball-api.com/transformaciones/trunks ssj iracundo.webp","ki":"17.5 Quintillion ","deletedAt":null}]}
     const personaje5 ={"id":22,"name":"Android 17","ki":"320.000.000","maxKi":"40 Quintillion","race":"Android","gender":"Male","description":"Antes de ser secuestrado, es el hermano mellizo de la Androide Número 18, quien al igual que ella antes de ser Androide era un humano normal hasta que fueron secuestrados por el Dr. Gero, y es por eso que lo odian. Tras su cambio de humano a Androide, le insertaron un chip con el objetivo de destruir a Son Goku, quien en su juventud extermino al Ejército del Listón Rojo. Al considerarse defectuoso porque no quería ser 'esclavo de nadie', el Dr. Gero les había colocado a ambos hermanos, un dispositivo de apagado para detenerlos en cualquier momento de desobediencia, pero cuando el científico los despierta, el rencor y rebeldía de 17 eran tal que se encargó de destruir el control que lo volvería a encerrar y acto seguido mató sin piedad a su propio creador. Su situación se le iría en contra, ya que Cell tenía como misión absorber a 17 y 18 para completar su desarrollo y convertirse en Cell Perfecto.","image":"https://dragonball-api.com/characters/17_Artwork.webp","affiliation":"Villain","deletedAt":null,"originPlanet":{"id":2,"name":"Tierra","isDestroyed":false,"description":"La Tierra también llamado Mundo del Dragón (Dragon World), es el planeta principal donde se desarrolla la serie de Dragon Ball. Se encuentra en el Sistema Solar de la Vía Láctea de las Galaxias del Norte del Universo 7, lugar que supervisa el Kaio del Norte, y tiene su equivalente en el Universo 6. El hogar de los terrícolas y los Guerreros Z. Ha sido atacado en varias ocasiones por enemigos poderosos.","image":"https://dragonball-api.com/planetas/Tierra_Dragon_Ball_Z.webp","deletedAt":null},"transformations":[]}
     const personaje6 ={"id":33,"name":"Bills","ki":"102 Billion","maxKi":"100 septillion","race":"God","gender":"Male","description":"Dios de la Destrucción Beerus, conocido también como Beers, o Bills en Hispanoamérica e inicialmente en España[1], es un personaje que fue introducido en la película Dragon Ball Z: La batalla de los dioses, donde es el antagonista principal de la película, y que aparece en el manga y anime de Dragon Ball Super como un personaje principal. Ocupa el puesto de Dios de la Destrucción de todo el Universo 7 siendo el lugar donde se desarrolla la historia de Dragon Ball.","image":"https://dragonball-api.com/characters/Beerus_DBS_Broly_Artwork.webp","affiliation":"Other","deletedAt":null,"originPlanet":{"id":19,"name":"Planeta de Bills ","isDestroyed":false,"description":"Planeta de Bills un cuerpo celeste ubicado dentro del mundo de los vivos del Universo 7, el cual aparece por primera vez en la película Dragon Ball Z: La Batalla de los Dioses.","image":"https://dragonball-api.com/planetas/Templo_de_Bills2.webp","deletedAt":null},"transformations":[]}
-    const personaje7 ={"id":2,"name":"Vegeta","ki":"54.000.000","maxKi":"19.84 Septillion","race":"Saiyan","gender":"Male","description":"Príncipe de los Saiyans, inicialmente un villano, pero luego se une a los Z Fighters. A pesar de que a inicios de Dragon Ball Z, Vegeta cumple un papel antagónico, poco después decide rebelarse ante el Imperio de Freeza, volviéndose un aliado clave para los Guerreros Z. Con el paso del tiempo llegaría a cambiar su manera de ser, optando por permanecer y vivir en la Tierra para luchar a su lado contra las inminentes adversidades que superar. Junto con Piccolo, él es de los antiguos enemigos de Goku que ha evolucionando al pasar de ser un villano y antihéroe, a finalmente un héroe a lo largo del transcurso de la historia, convirtiéndose así en el deuteragonista de la serie.","image":"https://dragonball-api.com/characters/vegeta_normal.webp","affiliation":"Z Fighter","deletedAt":null,"originPlanet":{"id":3,"name":"Vegeta","isDestroyed":true,"description":"El planeta Vegeta, conocido como planeta Plant antes del fin de la Guerra Saiyan-tsufruiana en el año 730, es un planeta rocoso ficticio de la serie de manga y anime Dragon Ball y localizado en la Vía Láctea de las Galaxias del Norte del Universo 7 hasta su destrucción a manos de Freezer en los años 737-739. Planeta natal de los Saiyans, destruido por Freezer. Anteriormente conocido como Planeta Plant.","image":"https://dragonball-api.com/planetas/Planeta_Vegeta_en_Dragon_Ball_Super_Broly.webp","deletedAt":null},"transformations":[{"id":7,"name":"Vegeta SSJ","image":"https://dragonball-api.com/transformaciones/vegeta SSJ (2).webp","ki":"330.000.000","deletedAt":null},{"id":8,"name":"Vegeta SSJ2","image":"https://dragonball-api.com/transformaciones/vegeta SSJ2.webp","ki":"24 Billion","deletedAt":null},{"id":9,"name":"Vegeta SSJ4","image":"https://dragonball-api.com/transformaciones/vegeta ssj4.webp","ki":"1.8 Trillion","deletedAt":null},{"id":10,"name":"Vegeta SSJB","image":"https://dragonball-api.com/transformaciones/vegeta SSJB.webp","ki":"100 Quintillion","deletedAt":null},{"id":11,"name":"Vegeta Mega Instinc Evil","image":"https://dragonball-api.com/transformaciones/vegeta mega instinto.webp","ki":"19.84 Septillion","deletedAt":null}]}
 
-    characters = [personaje1, personaje2, personaje3, personaje4, personaje5, personaje6, personaje7];
+    characters = [personaje1, personaje2, personaje3, personaje4, personaje5, personaje6];
     const availableCharacters = Array.isArray(characters) && characters.length > 0
       ? characters
       : [personaje];
 
     useEffect(() => {
+        if (!user?.id) {
+            setLoading(false);
+            return;
+        }
+
         cargarEquipos();
-    }, []);
+    }, [user]);
 
     const cargarEquipos = async () => {
         try {
-        const data = await AsyncStorage.getItem(STORAGE_KEY);
-        if (data) {
-            setTeams(JSON.parse(data));
-        }
+            if (!user?.id) {
+                setTeams([]);
+                return;
+            }
+
+            const url = `https://6a2898d24e1e783349a5aeca.mockapi.io/sp/users/${user.id}/team`;
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}`);
+            }
+
+            const data = await response.json();
+            const rawTeams = Array.isArray(data) ? data : (data ? [data] : []);
+            const normalizedTeams = rawTeams
+              .map((entry) => normalizeTeamFromApi(entry))
+              .filter(Boolean);
+
+            setTeams(normalizedTeams);
         } catch (error) {
-        console.log('Error al cargar equipos:', error);
+            console.log('Error al cargar equipos:', error);
+            setTeams([]);
         } finally {
-        setLoading(false);
+            setLoading(false);
         }
     };
 
     const guardarEquipos = async (lista) => {
-        try {
+      if (!user?.id) {
+        console.log('No hay usuario logueado para guardar equipos');
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `https://6a2898d24e1e783349a5aeca.mockapi.io/sp/users/${user.id}/team`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(lista),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        setTeams(Array.isArray(data) ? data : lista);
+      } catch (error) {
+        console.log('Error al guardar equipos:', error);
+      try {
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
         setTeams(lista);
-        } catch (error) {
-        console.log('Error al guardar equipos:', error);
-        }
+      } catch (storageError) {
+        console.log('Error al guardar equipos en storage local:', storageError);
+      }
+      }
     };
 
     const toggleCharacter = (character) => {
@@ -93,12 +172,13 @@ export default function Selector({ characters = null }) {
         id: Date.now().toString(),
         name: nombre,
         members: selectedCharacters.length,
-        status: 'Nuevo',
         characters: selectedCharacters,
         };
 
         const listaActualizada = [nuevoEquipo, ...teams];
-        await guardarEquipos(listaActualizada);
+
+        await guardarEquipos(nuevoEquipo);
+        setTeams(listaActualizada);
 
         setTeamName('');
         setSelectedCharacterIds([]);
@@ -107,32 +187,81 @@ export default function Selector({ characters = null }) {
 
     const updateTeam = async () => {
         const nombre = teamName.trim();
+        const teamId = String(editingId ?? '');
 
-        if (!nombre || !editingId || selectedCharacterIds.length === 0) {
-        return;
+        if (!nombre || !teamId) {
+            return;
         }
+        console.log('Iniciando actualización del equipo con ID:', teamId);
+        try {
+            const currentUserId = user?.id ?? await getStoredUserId();
+            if (!currentUserId) {
+                console.log('No hay usuario para actualizar el equipo');
+                return;
+            }
 
-        const selectedCharacters = availableCharacters.filter((character) =>
-        selectedCharacterIds.includes(character.id)
-        );
+            const equipoActual = teams.find((team) => String(team.id) === teamId);
+            const idsToUse = selectedCharacterIds.length > 0
+                ? selectedCharacterIds
+                : (Array.isArray(equipoActual?.characters)
+                    ? equipoActual.characters.map((character) => String(character.id))
+                    : []);
 
-        const listaActualizada = teams.map((team) =>
-            team.id === editingId
-              ? { ...team, name: nombre, status: 'Editado', members: selectedCharacters.length, characters: selectedCharacters }
-              : team
-        );
+            const selectedCharacters = availableCharacters.filter((character) =>
+                idsToUse.some((id) => String(character.id) === String(id))
+            );
 
-        await guardarEquipos(listaActualizada);
+            const personajesFinales = selectedCharacters.length > 0
+                ? selectedCharacters
+                : (Array.isArray(equipoActual?.characters) ? equipoActual.characters : []);
+            const equipoEditado = {
+                ...(equipoActual || {}),
+                id: teamId,
+                name: nombre,
+                members: personajesFinales.length,
+                characters: personajesFinales,
+                status: 'Editado',
+                userId: String(currentUserId),
+            };
 
-        setTeamName('');
-        setEditingId(null);
+            const response = await fetch(
+                `https://6a2898d24e1e783349a5aeca.mockapi.io/sp/users/${currentUserId}/team/${teamId}`,
+                {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(equipoEditado),
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}`);
+            }
+
+            const updatedTeam = await response.json();
+            const normalizedUpdatedTeam = normalizeTeamFromApi(updatedTeam) ?? {
+                ...equipoEditado,
+                ...updatedTeam,
+            };
+
+            const listaActualizada = teams.map((team) =>
+                String(team.id) === teamId ? normalizedUpdatedTeam : team
+            );
+
+            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(listaActualizada));
+            setTeams(listaActualizada);
+            setTeamName('');
+            setEditingId(null);
+            setSelectedCharacterIds([]);
+        } catch (error) {
+            console.log('Error al actualizar equipo:', error);
+        }
     };
 
     const handleSave = async () => {
-        if (editingId) {
-        await updateTeam();
+        if (editingId !== null && editingId !== undefined && editingId !== '') {
+            await updateTeam();
         } else {
-        await createTeam();
+            await createTeam();
         }
     };
 
@@ -215,9 +344,6 @@ export default function Selector({ characters = null }) {
               })}
             </View>
 
-            <Text style={styles.helperText}>
-              La selección se guarda dentro del equipo y se puede usar después para el ABM de personajes.
-            </Text>
 
             <View style={styles.actionsRow}>
               <TouchableOpacity style={styles.primaryButton} onPress={handleSave}>
@@ -248,7 +374,6 @@ export default function Selector({ characters = null }) {
               <View key={team.id} style={styles.teamCard}>
                 <View style={styles.teamInfo}>
                   <Text style={styles.teamName}>{team.name}</Text>
-                  <Text style={styles.teamMeta}>Estado: {team.status}</Text>
                   <Text style={styles.teamMeta}>
                     Personajes: {Array.isArray(team.characters) ? team.characters.length : team.members}
                   </Text>
