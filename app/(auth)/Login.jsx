@@ -6,10 +6,22 @@ import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 
 export default function Login() {
 
-  const { login, error } = useAuth()
+  const { login, error, register } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [userName, setUserName] = useState('')
+  const [profilePic, setProfilePic] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [isRegister, setIsRegister] = useState(false)
+
+  const handlePrimaryAction = () => {
+    if (isRegister) {
+      register(email, password, userName, profilePic)
+      return
+    }
+
+    login(email, password)
+  }
 
   return (
     <View style={styles.container}>
@@ -25,7 +37,7 @@ export default function Login() {
             resizeMode="contain"
           />
 
-          <Text style={styles.title}>INICIA SESION</Text>
+          <Text style={styles.title}>{isRegister ? 'REGISTRATE' : 'INICIA SESION'}</Text>
 
           {error && <Text style={styles.errorText}>{error}</Text>}
 
@@ -61,8 +73,36 @@ export default function Login() {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={() => login(email, password)}>
-            <Text style={styles.buttonText}>INICIAR SESION</Text>
+          {isRegister && (
+            <>
+              <View style={styles.inputContainer}>
+                <MaterialCommunityIcons name="account-outline" size={20} color="#aaa" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nombre de usuario"
+                  placeholderTextColor="#888"
+                  autoCapitalize="words"
+                  value={userName}
+                  onChangeText={setUserName}
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <MaterialCommunityIcons name="image-outline" size={20} color="#aaa" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="URL de foto de perfil"
+                  placeholderTextColor="#888"
+                  autoCapitalize="none"
+                  value={profilePic}
+                  onChangeText={setProfilePic}
+                />
+              </View>
+            </>
+          )}
+
+          <TouchableOpacity style={styles.button} onPress={handlePrimaryAction}>
+            <Text style={styles.buttonText}>{isRegister ? 'REGISTRARME' : 'INICIAR SESION'}</Text>
           </TouchableOpacity>
 
           <View style={styles.dividerContainer}>
@@ -71,9 +111,9 @@ export default function Login() {
           </View>
 
           <View style={styles.registerRow}>
-            <Text style={styles.registerText}>No tienes cuenta? </Text>
-            <TouchableOpacity>
-              <Text style={styles.registerLink}>REGISTRATE</Text>
+            <Text style={styles.registerText}>{isRegister ? 'Ya tienes cuenta? ' : 'No tienes cuenta? '}</Text>
+            <TouchableOpacity onPress={() => setIsRegister(!isRegister)}>
+              <Text style={styles.registerLink}>{isRegister ? 'INICIA SESION' : 'REGISTRATE'}</Text>
             </TouchableOpacity>
           </View>
 
