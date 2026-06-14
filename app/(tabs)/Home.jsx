@@ -11,20 +11,15 @@ export default function Home(){
 
   const menuOptions = [
     {
-      title: 'CRONICAS Z',
-      subtitle: 'Modo Historia',
+      title: 'Duelo',
+      subtitle: 'Batallas contra CPU',
       icon: 'sword-cross',
     },
     {
-      title: 'DUELO',
-      subtitle: 'Batallas contra CPU',
+      title: 'Configuración Duelo',
+      subtitle: 'Crea tus plantillas de duelo',
       icon: 'earth',
-    },
-    {
-      title: 'TENKAICHI BUDOKAI',
-      subtitle: 'Torneo del Poder',
-      icon: 'fire',
-    },
+    }
   ];
 
   return (
