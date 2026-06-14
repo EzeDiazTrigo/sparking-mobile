@@ -7,28 +7,19 @@ import TopBar from '../../src/components/TopBar';
 
 export default function Home(){
 
-
   const {user} = useAuth()
-  var level;
-  var zeni;
-  var points;
 
   const menuOptions = [
     {
-      title: 'CRONICAS Z',
-      subtitle: 'Modo Historia',
+      title: 'Duelo',
+      subtitle: 'Batallas contra CPU',
       icon: 'sword-cross',
     },
     {
-      title: 'DUELO',
-      subtitle: 'Batallas contra CPU',
+      title: 'Configuración Duelo',
+      subtitle: 'Crea tus plantillas de duelo',
       icon: 'earth',
-    },
-    {
-      title: 'TENKAICHI BUDOKAI',
-      subtitle: 'Torneo del Poder',
-      icon: 'fire',
-    },
+    }
   ];
 
   return (
@@ -59,7 +50,7 @@ export default function Home(){
 
           {menuOptions.map((item, index) => (
             <TouchableOpacity
-              key={index}
+              key={item.title}
               style={styles.menuButton}
               activeOpacity={0.85}
             >
