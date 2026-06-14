@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router'
 import React from 'react'
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 export default function TabsLayout(){
 
@@ -29,6 +30,34 @@ export default function TabsLayout(){
           tabBarIcon: ({ color, size }) => (
             <AntDesign
               name="home"
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="Selector"
+        options={{
+          title: 'Equipos',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons
+              name="account-group"
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="TusPersonajes"
+        options={{
+          title: 'Tus personajes',
+          tabBarIcon: ({ color, size }) => (
+            <Feather
+              name="users"
               size={size}
               color={color}
             />

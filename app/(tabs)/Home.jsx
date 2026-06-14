@@ -8,7 +8,6 @@ import TopBar from '../../src/components/TopBar';
 
 export default function Home(){
 
-
   const {user} = useAuth()
   const router = useRouter();
   const TITLES = ['Duelo', 'Configuración Duelo']
