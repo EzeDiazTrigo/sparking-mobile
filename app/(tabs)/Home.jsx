@@ -6,10 +6,6 @@ import { StatusBar } from 'expo-status-bar';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import TopBar from '../../src/components/TopBar';
 
-export default function Home(){
-
-  const {user} = useAuth()
-  const router = useRouter();
   const TITLES = ['Duelo', 'Configuración Duelo']
   const menuOptions = [
     {
@@ -23,6 +19,11 @@ export default function Home(){
       icon: 'earth',
     },
   ];
+
+export default function Home(){
+
+  const {user} = useAuth()
+  const router = useRouter();
 
   return (
       <View style={styles.container}>
@@ -58,6 +59,8 @@ export default function Home(){
               onPress={() => {
                 if (item.title === TITLES[1]) {
                   router.push('/(game)/CrearDuelo');
+                }else if(item.title === TITLES[0]){
+                  router.push('/(game)/PlayDuelo');
                 }
               }}
             >
