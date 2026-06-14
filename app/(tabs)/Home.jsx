@@ -7,11 +7,7 @@ import TopBar from '../../src/components/TopBar';
 
 export default function Home(){
 
-
   const {user} = useAuth()
-  var level;
-  var zeni;
-  var points;
 
   const menuOptions = [
     {
@@ -59,7 +55,7 @@ export default function Home(){
 
           {menuOptions.map((item, index) => (
             <TouchableOpacity
-              key={index}
+              key={item.title}
               style={styles.menuButton}
               activeOpacity={0.85}
             >
