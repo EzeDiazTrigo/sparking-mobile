@@ -8,9 +8,13 @@ import {
     TouchableOpacity,
     FlatList,
     ScrollView,
+    Alert,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useAuth } from '../../src/context/AuthContext';
+
+const DUEL_URL = 'https://6a2b50c3b687a7d5cbc51cc1.mockapi.io/sp/duel';
 
 const difficulties = [
         { id: 1, label: 'Fácil', multiplier: 1 },
@@ -19,11 +23,16 @@ const difficulties = [
     ];
 
 export default function Duelos() {
+    const { user } = useAuth();
     const [difficulty, setDifficulty] = useState(null);
     const [planet, setPlanet] = useState(null);
     const [duels, setDuels] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedPlanet, setSelectedPlanet] = useState(null);
+
+    const getDifficultyLabel = (id) => {
+        return difficulties.find(d => d.id === id)?.label ?? 'Desconocida';
+    };
 
     const traerPlanetas = async () => {
       try{
@@ -45,20 +54,88 @@ export default function Duelos() {
     }
 
     useEffect(() => {
-                traerPlanetas()
-        }, [])
-    // Implementar después
-    const crearDuelo = () => {};
+        traerPlanetas()
+    }, [])
 
-    const cargarDuelo = () => {};
+    const cargarDuelo = async () => {
+        if (!user?.id) return;
 
-    const editarDuelo = () => {};
+        try {
+            setLoading(true);
+            const url = `${DUEL_URL}?userId=${user.id}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            setDuels(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.log("Error al cargar duelos:", error);
+            setDuels([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    const borrarDuelo = () => {};
+    const crearDuelo = async () => {
+        if (!difficulty || !selectedPlanet) {
+            Alert.alert('Faltan datos', 'Elegí dificultad y planeta.');
+            return;
+        }
+
+        const planetaElegido = planet?.find(p => p.id === selectedPlanet);
+        if (!planetaElegido) return;
+
+        const body = {
+            userId: String(user.id),
+            difficultyId: difficulty,
+            planet: planetaElegido,
+        };
+
+        try {
+            const response = await fetch(DUEL_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+
+            if (!response.ok) {
+                Alert.alert('Error', 'No se pudo crear el duelo.');
+                return;
+            }
+
+            const duelNuevo = await response.json();
+            setDuels(prev => [...prev, duelNuevo]);
+            setDifficulty(null);
+            setSelectedPlanet(null);
+        } catch (error) {
+            console.log("Error al crear duelo:", error);
+            Alert.alert('Error de red', 'No se pudo crear el duelo.');
+        }
+    };
+
+    const borrarDuelo = (id) => {
+        Alert.alert(
+            'Borrar duelo',
+            '¿Seguro? Esta acción no se puede deshacer.',
+            [
+                { text: 'Cancelar', style: 'cancel' },
+                {
+                    text: 'Borrar',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await fetch(`${DUEL_URL}/${id}`, { method: 'DELETE' });
+                            setDuels(prev => prev.filter(d => d.id !== id));
+                        } catch (error) {
+                            console.log("Error al borrar duelo:", error);
+                        }
+                    }
+                }
+            ]
+        );
+    };
 
     useEffect(() => {
         cargarDuelo();
-    }, []);
+    }, [user]);
 
     return (
         <View style={styles.container}>
@@ -189,30 +266,25 @@ export default function Duelos() {
                             key={duel.id}
                             style={styles.duelCard}
                         >
+                            {duel.planet?.image && (
+                                <Image
+                                    source={{ uri: duel.planet.image }}
+                                    style={styles.duelAvatar}
+                                    resizeMode="cover"
+                                />
+                            )}
+
                             <View style={styles.duelInfo}>
                                 <Text style={styles.duelTitle}>
-                                    {duel.name}
+                                    {duel.planet?.name ?? 'Planeta desconocido'}
                                 </Text>
 
                                 <Text style={styles.duelMeta}>
-                                    {duel.difficulty} • {duel.planet}
+                                    Dificultad: {getDifficultyLabel(duel.difficultyId)}
                                 </Text>
                             </View>
 
                             <View style={styles.inlineButtons}>
-                                <TouchableOpacity
-                                    style={styles.iconButton}
-                                    onPress={() =>
-                                        editarDuelo(duel)
-                                    }
-                                >
-                                    <MaterialCommunityIcons
-                                        name="pencil"
-                                        size={18}
-                                        color="#0a0e1a"
-                                    />
-                                </TouchableOpacity>
-
                                 <TouchableOpacity
                                     style={styles.iconButtonDanger}
                                     onPress={() =>
@@ -412,6 +484,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+    },
+
+    duelAvatar: {
+        width: 48,
+        height: 48,
+        borderRadius: 8,
+        marginRight: 12,
+        backgroundColor: '#1a2942',
     },
 
     duelInfo: {
