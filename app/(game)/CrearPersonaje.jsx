@@ -285,8 +285,10 @@ const styles = StyleSheet.create({
     },
 
     imageOption: {
-        width: '48%',
+        width: '30%',
         aspectRatio: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
         borderRadius: 12,
         borderWidth: 2,
         borderColor: '#1a2942',
@@ -302,6 +304,7 @@ const styles = StyleSheet.create({
     imagePreview: {
         width: '100%',
         height: '100%',
-        resizeMode: 'cover',
+        resizeMode: 'contain',
+        alignSelf: 'center',
     },
 })
