@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import React from 'react'
 import { StyleSheet, Text, TouchableOpacity, View, Image, SafeAreaView, ScrollView } from 'react-native';
 import { useAuth } from '../../src/context/AuthContext';
@@ -8,18 +9,19 @@ import TopBar from '../../src/components/TopBar';
 export default function Home(){
 
   const {user} = useAuth()
-
+  const router = useRouter();
+  const TITLES = ['Duelo', 'Configuración Duelo']
   const menuOptions = [
     {
-      title: 'Duelo',
+      title: TITLES[0],
       subtitle: 'Batallas contra CPU',
       icon: 'sword-cross',
     },
     {
-      title: 'Configuración Duelo',
+      title: TITLES[1],
       subtitle: 'Crea tus plantillas de duelo',
       icon: 'earth',
-    }
+    },
   ];
 
   return (
@@ -48,11 +50,16 @@ export default function Home(){
 
         <View style={styles.menuContainer}>
 
-          {menuOptions.map((item, index) => (
+          {menuOptions.map((item) => (
             <TouchableOpacity
               key={item.title}
               style={styles.menuButton}
               activeOpacity={0.85}
+              onPress={() => {
+                if (item.title === TITLES[1]) {
+                  router.push('/(game)/CrearDuelo');
+                }
+              }}
             >
 
               <View style={styles.iconContainer}>
