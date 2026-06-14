@@ -10,9 +10,8 @@ export default function Home(){
 
   const {user} = useAuth()
   var level;
-  var zeni;
-  var points;
-
+  const router = useRouter();
+  const TITLES = ['Duelo', 'Configuración Duelo']
   const menuOptions = [
     {
       title: 'CRONICAS Z',
@@ -57,11 +56,13 @@ export default function Home(){
 
         <View style={styles.menuContainer}>
 
-          {menuOptions.map((item, index) => (
+          {menuOptions.map((item) => (
             <TouchableOpacity
               key={index}
               style={styles.menuButton}
               activeOpacity={0.85}
+              onPress={() => {
+                if (item.title === TITLES[1]) {
             >
 
               <View style={styles.iconContainer}>
