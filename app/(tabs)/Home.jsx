@@ -58,6 +58,8 @@ export default function Home(){
               onPress={() => {
                 if (item.title === TITLES[1]) {
                   router.push('/(game)/CrearDuelo');
+                }else if(item.title === TITLES[0]){
+                  router.push('/(game)/Batalla');
                 }
               }}
             >
