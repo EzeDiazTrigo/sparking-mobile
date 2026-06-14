@@ -12,18 +12,18 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+const difficulties = [
+        { id: 1, label: 'Fácil', multiplier: 1 },
+        { id: 2, label: 'Media', multiplier: 1.3 },
+        { id: 3, label: 'Difícil', multiplier: 1.5 },
+    ];
+
 export default function Duelos() {
     const [difficulty, setDifficulty] = useState(null);
     const [planet, setPlanet] = useState(null);
     const [duels, setDuels] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedPlanet, setSelectedPlanet] = useState(null);
-
-    const difficulties = [
-        { id: 1, label: 'Fácil', multiplier: 1 },
-        { id: 2, label: 'Media', multiplier: 1.3 },
-        { id: 3, label: 'Difícil', multiplier: 1.5 },
-    ];
 
     const traerPlanetas = async () => {
       try{
@@ -43,14 +43,6 @@ export default function Duelos() {
       }
         
     }
-
-
-    const cleanImageUrl = (url) => {
-        if (!url) return null;
-
-        const match = url.match(/\((https?:\/\/.*?)\)/);
-        return match ? match[1] : url;
-    };
 
     useEffect(() => {
                 traerPlanetas()
@@ -90,7 +82,7 @@ export default function Duelos() {
                         </Text>
 
                         <MaterialCommunityIcons
-                            name="sword-cross"
+                            name="sword"
                             size={24}
                             color="#38bdf8"
                         />
@@ -145,7 +137,7 @@ export default function Duelos() {
                                 onPress={() => setSelectedPlanet(item.id)}
                             >
                                 <Image
-                                    source={{ uri: cleanImageUrl(item.image) }}
+                                    source={{ uri: item.image }}
                                     style={styles.planetImage}
                                     resizeMode="cover"
                                 />
@@ -344,6 +336,14 @@ const styles = StyleSheet.create({
 
     planetCardSelected: {
         backgroundColor: '#38bdf8',
+    },
+
+    planetImage: {
+        width: '100%',
+        aspectRatio: 1,
+        borderRadius: 12,
+        marginBottom: 8,
+        backgroundColor: '#1a2942',
     },
 
     planetText: {

@@ -23,11 +23,6 @@ export default function Home(){
       subtitle: 'Crea tus plantillas de duelo',
       icon: 'earth',
     },
-    {
-      title: 'TENKAICHI BUDOKAI',
-      subtitle: 'Torneo del Poder',
-      icon: 'fire',
-    },
   ];
 
   return (
@@ -58,7 +53,7 @@ export default function Home(){
 
           {menuOptions.map((item) => (
             <TouchableOpacity
-              key={index}
+              key={item.title}
               style={styles.menuButton}
               activeOpacity={0.85}
               onPress={() => {
