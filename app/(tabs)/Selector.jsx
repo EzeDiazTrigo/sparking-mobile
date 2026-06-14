@@ -9,6 +9,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  RefreshControl,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -16,6 +17,7 @@ import { StatusBar } from 'expo-status-bar';
 import TopBar from '../../src/components/TopBar';
 import { useAuth } from '../../src/context/AuthContext';
 import { SPRITES } from '../../src/constants/sprites'
+import { useSegments } from 'expo-router';
 
 const STORAGE_KEY = 'sparking_teams';
 const AVATAR_PLACEHOLDER = 'https://static.vecteezy.com/system/resources/thumbnails/053/406/424/small/person-gray-photo-placeholder-man-on-gray-background-avatar-man-icon-anonymous-user-male-no-photo-web-template-default-user-picture-for-social-networks-social-media-resume-forums-free-vector.jpg'
@@ -58,6 +60,7 @@ export default function Selector({ characters = null }) {
     const [editingId, setEditingId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedCharacterIds, setSelectedCharacterIds] = useState([]);
+    const segments = useSegments()
 
     const traerPersonajes = async () => {
       try{
@@ -87,8 +90,10 @@ export default function Selector({ characters = null }) {
     }
 
     useEffect(() => {
-            traerPersonajes()
-    }, [])
+      if(segments.includes('Selector')){
+        traerPersonajes()
+      }
+    }, [segments])
 
     characters = personajes;
     const availableCharacters = Array.isArray(characters) && characters.length > 0
@@ -352,7 +357,14 @@ export default function Selector({ characters = null }) {
       <StatusBar hidden />
 
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}
+          refreshControl={
+            <RefreshControl
+                refreshing={cargando}
+                onRefresh={traerPersonajes}
+            />
+          }
+        >
           <View style={styles.headerBox}>
             <TopBar />
             <Text style={styles.title}>Equipos</Text>
