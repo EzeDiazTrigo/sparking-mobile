@@ -106,7 +106,6 @@ export default function ConfiguracionBatalla({ onStart }) {
                                                     <Image
                                                         source={SPRITES[c.image] || { uri: '' }}
                                                         style={styles.avatar}
-                                                        resizeMode="cover"
                                                     />
                                                 </View>
                                             ))}
@@ -193,7 +192,7 @@ const styles = StyleSheet.create({
 
     avatarRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, justifyContent: 'center' },
     avatarFrame: { width: 36, height: 36, borderRadius: 8, overflow: 'hidden', backgroundColor: '#1a2942' },
-    avatar: { width: '100%', height: '100%' },
+    avatar: { width: '100%', height: '100%', resizeMode: 'contain'},
 
     planetImage: { width: 80, height: 80, borderRadius: 10, marginBottom: 8, backgroundColor: '#1a2942' },
 

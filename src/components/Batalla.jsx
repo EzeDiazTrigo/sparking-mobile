@@ -43,7 +43,7 @@ const parseKi = (val) => {
 
     const str = val.trim().toLowerCase()
 
-    if (str === 'unknown' || str === '?' || str === '-') return 0
+    if (str === 'unknown' || str === '?' || str === '-') return 1000000
 
     if (/^[\d.,\s]+$/.test(str)) {
         const numero = Number(str.replace(/[.,\s]/g, '')) || 0
@@ -232,7 +232,6 @@ export default function Batalla({ equipo, duelo }) {
                                                 <Image
                                                     source={SPRITES[p.image] || { uri: '' }}
                                                     style={[styles.allyImage, !p.vivo && styles.imageDead]}
-                                                    resizeMode="cover"
                                                 />
                                             </View>
                                             <Text style={styles.fighterName} numberOfLines={1}>{p.name}</Text>
@@ -348,7 +347,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#1a2942',
         marginBottom: 6,
     },
-    allyImage: { width: '100%', height: '100%' },
+    allyImage: { width: '100%', height: '100%', resizeMode: 'contain' },
 
     imageDead: { opacity: 0.3 },
 
