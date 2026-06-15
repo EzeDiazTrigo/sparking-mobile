@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { View, Text, TouchableOpacity, FlatList, Image, StyleSheet, SafeAreaView, Alert } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useAuth } from '../../src/context/AuthContext'
-import { useRouter } from 'expo-router'
+import { useRouter, useFocusEffect } from 'expo-router'
 import { SPRITES } from '../../src/constants/sprites'
 
 const AVATAR_PLACEHOLDER = 'https://static.vecteezy.com/system/resources/thumbnails/053/406/424/small/person-gray-photo-placeholder-man-on-gray-background-avatar-man-icon-anonymous-user-male-no-photo-web-template-default-user-picture-for-social-networks-social-media-resume-forums-free-vector.jpg'
@@ -23,9 +23,11 @@ export default function TusPersonajes() {
         setCargando(false)
     }
 
-    useEffect(() => {
-        traerPersonajes()
-    }, [])
+    useFocusEffect(
+        useCallback(() => {
+            traerPersonajes();
+        }, [])
+    );
 
     const borrarPersonaje = (id) => {
         Alert.alert(
