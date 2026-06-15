@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useAuth } from '../../src/context/AuthContext.jsx';
 import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 
+const AVATAR_PLACEHOLDER = 'https://static.vecteezy.com/system/resources/thumbnails/053/406/424/small/person-gray-photo-placeholder-man-on-gray-background-avatar-man-icon-anonymous-user-male-no-photo-web-template-default-user-picture-for-social-networks-social-media-resume-forums-free-vector.jpg'
+
 export default function Login() {
 
   const { login, error, register } = useAuth()
@@ -22,7 +24,7 @@ export default function Login() {
         userName,
         profilePic?.trim()
           ? profilePic
-          : "https://img.magnific.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740&q=80"
+          : AVATAR_PLACEHOLDER
       );
       return
     }

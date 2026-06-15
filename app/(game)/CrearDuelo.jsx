@@ -164,7 +164,7 @@ export default function Duelos() {
                             name="close-circle"
                             size={24}
                             color="#38bdf8"
-                            onPress={() => {router.push('/(tabs)/Home');}}
+                            onPress={() => {router.back();}}
                         />
                     </View>
 

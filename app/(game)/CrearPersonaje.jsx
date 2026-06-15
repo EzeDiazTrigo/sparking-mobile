@@ -4,6 +4,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { useAuth } from '../../src/context/AuthContext'
 import { SPRITES } from '../../src/constants/sprites'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 const RAZAS = ['Saiyajin', 'Namek', 'Humano', 'Androide', 'Freezer']
 const GENEROS = ['M', 'F']
@@ -110,10 +111,21 @@ export default function CrearPersonaje() {
 
             <SafeAreaView style={styles.safeArea}>
                 <ScrollView showsVerticalScrollIndicator={false}>
+                    <View style={styles.cardHeader}>
+                        <Text style={styles.title}>
+                            {esEdicion ? 'Editar Personaje' : 'Crear Personaje'}
+                        </Text>
 
-                    <Text style={styles.title}>{esEdicion ? 'Editar Personaje' : 'Crear Personaje'}</Text>
-
+                        <MaterialCommunityIcons
+                            name="close-circle"
+                            size={24}
+                            color="#38bdf8"
+                            onPress={() => {router.back();}}
+                        />
+                    </View>
+                    
                     <Text style={styles.label}>Nombre</Text>
+
                     <TextInput
                         style={styles.input}
                         value={nombre}
@@ -198,6 +210,13 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#0a0e1a',
+    },
+
+    cardHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 20,
     },
 
     safeArea: {

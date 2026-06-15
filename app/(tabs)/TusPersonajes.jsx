@@ -157,7 +157,39 @@ const styles = StyleSheet.create({
         height: 60,
         borderRadius: 12,
         marginRight: 14,
+        resizeMode: 'contain',
     },
+
+    imageGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+    },
+
+    imageOption: {
+        width: '30%',
+        aspectRatio: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 12,
+        borderWidth: 2,
+        borderColor: '#1a2942',
+        overflow: 'hidden',
+        backgroundColor: '#02142b',
+        marginBottom: 8,
+    },
+
+    imageOptionSelected: {
+        borderColor: '#2db4ff',
+    },
+
+    imagePreview: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'contain',
+        alignSelf: 'center',
+    },
+
 
     cardBody: {
         flex: 1,
