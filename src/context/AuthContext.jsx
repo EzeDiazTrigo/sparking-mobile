@@ -109,6 +109,57 @@ export function AuthProvider({ children }) {
         router.replace("/(tabs)/Home")
     }
 
+    const editUser = async (userName, profilePic, password) => {
+
+        if (!user) {
+            setError("No hay usuario logueado");
+            return false;
+        }
+
+        if (!userName || !profilePic || !password) {
+            setError("Faltan datos");
+            return false;
+        }
+
+        const body = {
+            ...user,
+            username: userName,
+            profile_pic: profilePic,
+            password: password,
+        };
+
+        try {
+            const response = await fetch(
+                `https://6a2898d24e1e783349a5aeca.mockapi.io/sp/users/${user.id}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(body),
+                }
+            );
+
+            if (!response.ok) {
+                setError("No se pudo actualizar el usuario");
+                return false;
+            }
+
+            const data = await response.json();
+
+            setUser(data);
+            await AsyncStorage.setItem("user", JSON.stringify(data));
+
+            setError("");
+            return true;
+
+        } catch (error) {
+            console.log("error:", error);
+            setError("Error de red");
+            return false;
+        }
+    };
+
     const logout = () => {
         setUser(null)
         AsyncStorage.removeItem("user")
@@ -116,7 +167,7 @@ export function AuthProvider({ children }) {
     }
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout, error }}>
+        <AuthContext.Provider value={{ user, loading, login, register, logout, error, editUser }}>
             {children}
         </AuthContext.Provider>
     )

@@ -49,10 +49,21 @@ export default function CrearPersonaje() {
     }, [id])
 
     const onGuardar = async () => {
+        const kiNumero = Number(ki);
 
         if (!nombre || !ki || !raza || !genero || !fotoId) {
             setError('Faltan datos')
             return
+        }
+
+        if (isNaN(kiNumero)) {
+        setError('El Ki debe ser un número válido');
+        return;
+        }
+
+        if (kiNumero > 1_000_000_000) {
+            setError('El Ki no puede ser mayor a 1.000.000.000');
+            return;
         }
 
         setCreando(true)

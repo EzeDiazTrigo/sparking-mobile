@@ -16,7 +16,14 @@ export default function Login() {
 
   const handlePrimaryAction = () => {
     if (isRegister) {
-      register(email, password, userName, profilePic)
+      register(
+        email,
+        password,
+        userName,
+        profilePic?.trim()
+          ? profilePic
+          : "https://img.magnific.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740&q=80"
+      );
       return
     }
 
