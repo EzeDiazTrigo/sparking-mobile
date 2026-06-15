@@ -13,6 +13,7 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuth } from '../../src/context/AuthContext';
+import { useRouter } from 'expo-router';
 
 const DUEL_URL = 'https://6a2b50c3b687a7d5cbc51cc1.mockapi.io/sp/duel';
 
@@ -29,6 +30,7 @@ export default function Duelos() {
     const [duels, setDuels] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedPlanet, setSelectedPlanet] = useState(null);
+      const router = useRouter();
 
     const getDifficultyLabel = (id) => {
         return difficulties.find(d => d.id === id)?.label ?? 'Desconocida';
@@ -159,9 +161,10 @@ export default function Duelos() {
                         </Text>
 
                         <MaterialCommunityIcons
-                            name="sword"
+                            name="close-circle"
                             size={24}
                             color="#38bdf8"
+                            onPress={() => {router.push('/(tabs)/Home');}}
                         />
                     </View>
 
