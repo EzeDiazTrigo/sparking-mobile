@@ -63,17 +63,19 @@ const parseKi = (val) => {
 
 const formatKi = (n) => Number(n).toLocaleString('es-AR')
 
-export default function Batalla({ equipo, duelo }) {
+export default function Batalla({ equipo, duelo, enemyTeam }) {
     const router = useRouter()
 
     const [equipoEstado, setEquipoEstado] = useState([])
     const [enemigos, setEnemigos] = useState([])
-    const [indicePersonaje, setIndicePersonaje] = useState(0)
-    const [indiceEnemigo, setIndiceEnemigo] = useState(0)
+    const [indicePersonaje, setIndicePersonaje] = useState(null)
+    const [indiceEnemigo, setIndiceEnemigo] = useState(null)
     const [cargando, setCargando] = useState(true)
     const [resultado, setResultado] = useState(null)
 
     const dificultad = getDifficulty(duelo.difficultyId)
+    const esPvp = !!enemyTeam
+    const puedeAtacar = indicePersonaje !== null && indiceEnemigo !== null
 
     useEffect(() => {
         const inicializar = async () => {
@@ -86,6 +88,21 @@ export default function Batalla({ equipo, duelo }) {
                     vivo: true,
                 }))
                 setEquipoEstado(equipoInicial)
+
+                if (esPvp) {
+                    const rivales = (enemyTeam.characters ?? []).map(e => {
+                        const kiBase = Number(e.ki) || 0
+                        return {
+                            ...e,
+                            kiActual: Math.floor(kiBase * dificultad.multiplier),
+                            kiInicial: Math.floor(kiBase * dificultad.multiplier),
+                            vivo: true,
+                            esRival: true,
+                        }
+                    })
+                    setEnemigos(rivales)
+                    return
+                }
 
                 const res = await fetch(`${CHARACTERS_URL}?limit=100`)
                 const data = await res.json()
@@ -113,60 +130,58 @@ export default function Batalla({ equipo, duelo }) {
 
     const atacar = () => {
         if (resultado !== null || cargando) return
+        if (indicePersonaje === null || indiceEnemigo === null) return
 
         const personaje = equipoEstado[indicePersonaje]
         const enemigo = enemigos[indiceEnemigo]
-        if (!personaje || !enemigo) return
+        if (!personaje || !enemigo || !personaje.vivo || !enemigo.vivo) return
 
         const kiP = personaje.ki
         const kiE = enemigo.kiActual
 
-        if (kiP > kiE) {
-            setEnemigos(prev => prev.map((e, i) =>
-                i === indiceEnemigo ? { ...e, kiActual: 0, vivo: false } : e
-            ))
-            setEquipoEstado(prev => prev.map((p, i) =>
-                i === indicePersonaje ? { ...p, ki: kiP - kiE } : p
-            ))
-            const proximo = indiceEnemigo + 1
-            if (proximo >= enemigos.length) {
-                setResultado('victoria')
-            } else {
-                setIndiceEnemigo(proximo)
-            }
-        } else if (kiE > kiP) {
-            setEnemigos(prev => prev.map((e, i) =>
-                i === indiceEnemigo ? { ...e, kiActual: kiE - kiP } : e
-            ))
-            setEquipoEstado(prev => prev.map((p, i) =>
-                i === indicePersonaje ? { ...p, vivo: false } : p
-            ))
-            const proximo = indicePersonaje + 1
-            if (proximo >= equipoEstado.length) {
-                setResultado('derrota')
-            } else {
-                setIndicePersonaje(proximo)
-            }
-        } else {
-            setEnemigos(prev => prev.map((e, i) =>
-                i === indiceEnemigo ? { ...e, kiActual: 0, vivo: false } : e
-            ))
-            setEquipoEstado(prev => prev.map((p, i) =>
-                i === indicePersonaje ? { ...p, vivo: false } : p
-            ))
-            const proximoE = indiceEnemigo + 1
-            const proximoP = indicePersonaje + 1
-            const sinEnemigos = proximoE >= enemigos.length
-            const sinPersonajes = proximoP >= equipoEstado.length
+        let nuevoEquipo = equipoEstado
+        let nuevosEnemigos = enemigos
+        let personajeMurio = false
+        let enemigoMurio = false
 
-            if (sinEnemigos && sinPersonajes) setResultado('empate')
-            else if (sinEnemigos) setResultado('victoria')
-            else if (sinPersonajes) setResultado('derrota')
-            else {
-                setIndiceEnemigo(proximoE)
-                setIndicePersonaje(proximoP)
-            }
+        if (kiP > kiE) {
+            nuevosEnemigos = enemigos.map((e, i) =>
+                i === indiceEnemigo ? { ...e, kiActual: 0, vivo: false } : e
+            )
+            nuevoEquipo = equipoEstado.map((p, i) =>
+                i === indicePersonaje ? { ...p, ki: kiP - kiE } : p
+            )
+            enemigoMurio = true
+        } else if (kiE > kiP) {
+            nuevosEnemigos = enemigos.map((e, i) =>
+                i === indiceEnemigo ? { ...e, kiActual: kiE - kiP } : e
+            )
+            nuevoEquipo = equipoEstado.map((p, i) =>
+                i === indicePersonaje ? { ...p, vivo: false } : p
+            )
+            personajeMurio = true
+        } else {
+            nuevosEnemigos = enemigos.map((e, i) =>
+                i === indiceEnemigo ? { ...e, kiActual: 0, vivo: false } : e
+            )
+            nuevoEquipo = equipoEstado.map((p, i) =>
+                i === indicePersonaje ? { ...p, vivo: false } : p
+            )
+            personajeMurio = true
+            enemigoMurio = true
         }
+
+        setEquipoEstado(nuevoEquipo)
+        setEnemigos(nuevosEnemigos)
+        if (personajeMurio) setIndicePersonaje(null)
+        if (enemigoMurio) setIndiceEnemigo(null)
+
+        const sinEnemigos = nuevosEnemigos.every(e => !e.vivo)
+        const sinPersonajes = nuevoEquipo.every(p => !p.vivo)
+
+        if (sinEnemigos && sinPersonajes) setResultado('empate')
+        else if (sinEnemigos) setResultado('victoria')
+        else if (sinPersonajes) setResultado('derrota')
     }
 
     const salir = () => router.replace('/(tabs)/Home')
@@ -199,21 +214,36 @@ export default function Batalla({ equipo, duelo }) {
                             <Text style={styles.sectionLabel}>Oponentes</Text>
                             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
                                 {enemigos.map((e, i) => {
-                                    const activo = i === indiceEnemigo && resultado === null && e.vivo
+                                    const seleccionado = i === indiceEnemigo && resultado === null && e.vivo
                                     return (
-                                        <View key={e.id} style={[
-                                            styles.fighterCard,
-                                            activo && styles.fighterCardActive,
-                                            !e.vivo && styles.fighterCardDead,
-                                        ]}>
-                                            <Image
-                                                source={{ uri: e.image }}
-                                                style={[styles.enemyImage, !e.vivo && styles.imageDead]}
-                                                resizeMode="contain"
-                                            />
+                                        <TouchableOpacity
+                                            key={e.id}
+                                            disabled={!e.vivo || resultado !== null}
+                                            onPress={() => setIndiceEnemigo(i)}
+                                            style={[
+                                                styles.fighterCard,
+                                                seleccionado && styles.fighterCardActive,
+                                                !e.vivo && styles.fighterCardDead,
+                                            ]}
+                                        >
+                                            {e.esRival ? (
+                                                <View style={styles.allyImageFrame}>
+                                                    <Image
+                                                        source={SPRITES[e.image] || { uri: '' }}
+                                                        style={[styles.allyImage, !e.vivo && styles.imageDead]}
+                                                        resizeMode="cover"
+                                                    />
+                                                </View>
+                                            ) : (
+                                                <Image
+                                                    source={{ uri: e.image }}
+                                                    style={[styles.enemyImage, !e.vivo && styles.imageDead]}
+                                                    resizeMode="contain"
+                                                />
+                                            )}
                                             <Text style={styles.fighterName} numberOfLines={1}>{e.name}</Text>
                                             <Text style={styles.fighterKi}>{formatKi(e.kiActual)}</Text>
-                                        </View>
+                                        </TouchableOpacity>
                                     )
                                 })}
                             </ScrollView>
@@ -221,13 +251,18 @@ export default function Batalla({ equipo, duelo }) {
                             <Text style={styles.sectionLabel}>Tu equipo: {equipo.name}</Text>
                             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
                                 {equipoEstado.map((p, i) => {
-                                    const activo = i === indicePersonaje && resultado === null && p.vivo
+                                    const seleccionado = i === indicePersonaje && resultado === null && p.vivo
                                     return (
-                                        <View key={p.id} style={[
-                                            styles.fighterCard,
-                                            activo && styles.fighterCardActive,
-                                            !p.vivo && styles.fighterCardDead,
-                                        ]}>
+                                        <TouchableOpacity
+                                            key={p.id}
+                                            disabled={!p.vivo || resultado !== null}
+                                            onPress={() => setIndicePersonaje(i)}
+                                            style={[
+                                                styles.fighterCard,
+                                                seleccionado && styles.fighterCardActive,
+                                                !p.vivo && styles.fighterCardDead,
+                                            ]}
+                                        >
                                             <View style={styles.allyImageFrame}>
                                                 <Image
                                                     source={SPRITES[p.image] || { uri: '' }}
@@ -236,13 +271,17 @@ export default function Batalla({ equipo, duelo }) {
                                             </View>
                                             <Text style={styles.fighterName} numberOfLines={1}>{p.name}</Text>
                                             <Text style={styles.fighterKi}>{formatKi(p.ki)}</Text>
-                                        </View>
+                                        </TouchableOpacity>
                                     )
                                 })}
                             </ScrollView>
 
                             {resultado === null && (
-                                <TouchableOpacity style={styles.attackButton} onPress={atacar}>
+                                <TouchableOpacity
+                                    style={[styles.attackButton, !puedeAtacar && styles.attackButtonDisabled]}
+                                    onPress={atacar}
+                                    disabled={!puedeAtacar}
+                                >
                                     <Text style={styles.attackButtonText}>Atacar</Text>
                                 </TouchableOpacity>
                             )}
@@ -366,6 +405,7 @@ const styles = StyleSheet.create({
         elevation: 6,
     },
     attackButtonText: { color: '#fff', fontSize: 18, fontWeight: '900', letterSpacing: 1 },
+    attackButtonDisabled: { opacity: 0.4, shadowOpacity: 0 },
 
     resultadoBox: {
         marginTop: 24,

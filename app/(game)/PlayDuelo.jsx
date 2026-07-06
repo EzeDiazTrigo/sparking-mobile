@@ -9,5 +9,5 @@ export default function PlayDuelo() {
         return <ConfiguracionBatalla onStart={setConfig} />
     }
 
-    return <Batalla equipo={config.equipo} duelo={config.duelo} />
+    return <Batalla equipo={config.equipo} duelo={config.duelo} enemyTeam={config.enemyTeam} />
 }
