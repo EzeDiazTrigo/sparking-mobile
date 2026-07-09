@@ -100,6 +100,7 @@ export function AuthProvider({ children }) {
 
         try {
            await AsyncStorage.setItem("user", JSON.stringify(data))
+           await AsyncStorage.setItem("showTutorialAfterRegister", "true")
         } catch (error) {
             console.log("error: ", error);
         }
@@ -107,6 +108,7 @@ export function AuthProvider({ children }) {
         setError('')
 
         router.replace("/(tabs)/Home")
+        
     }
 
     const editUser = async (userName, profilePic, password) => {

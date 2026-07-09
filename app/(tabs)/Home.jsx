@@ -1,10 +1,11 @@
 import { useRouter } from 'expo-router';
-import React from 'react'
-import { StyleSheet, Text, TouchableOpacity, View, Image, SafeAreaView, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react'
+import { StyleSheet, Text, TouchableOpacity, View, Image, SafeAreaView, ScrollView, Modal } from 'react-native';
 import { useAuth } from '../../src/context/AuthContext';
 import { StatusBar } from 'expo-status-bar';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import TopBar from '../../src/components/TopBar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
   const TITLES = ['Duelo', 'Configuración Duelo']
   const menuOptions = [
@@ -24,6 +25,23 @@ export default function Home(){
 
   const {user} = useAuth()
   const router = useRouter();
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  useEffect(() => {
+    const checkTutorialFlag = async () => {
+      try {
+        const shouldShow = await AsyncStorage.getItem('showTutorialAfterRegister');
+        if (shouldShow === 'true') {
+          setShowTutorial(true);
+          await AsyncStorage.removeItem('showTutorialAfterRegister');
+        }
+      } catch (error) {
+        console.log('error al verificar tutorial:', error);
+      }
+    };
+
+    checkTutorialFlag();
+  }, []);
 
   return (
       <View style={styles.container}>
@@ -42,11 +60,15 @@ export default function Home(){
             <TopBar/>
           </View>
 
+          
+
         </View>
 
         <View style={styles.titleContainer}>
           <Text style={styles.title}>Dragon Ball</Text>
           <Text style={styles.title}>Sparking Mobile</Text>
+          
+
         </View>
 
         <View style={styles.menuContainer}>
@@ -85,12 +107,45 @@ export default function Home(){
 
             </TouchableOpacity>
           ))}
-
+          <View style={styles.helpButtonWrapper}>
+            <TouchableOpacity
+              style={styles.helpButton}
+              onPress={() => setShowTutorial(true)}
+              accessibilityLabel="Abrir tutorial"
+            >
+              <Text style={styles.helpButtonText}>?</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
       </ScrollView>
 
     </SafeAreaView>
+
+    <Modal
+      visible={showTutorial}
+      transparent
+      animationType="fade"
+      onRequestClose={() => setShowTutorial(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalCard}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setShowTutorial(false)}
+            accessibilityLabel="Cerrar tutorial"
+          >
+            <MaterialCommunityIcons name="close" size={24} color="#fff" />
+          </TouchableOpacity>
+
+          <Image
+            source={require('../../assets/tutorial.png')}
+            style={styles.tutorialImage}
+            resizeMode="contain"
+          />
+        </View>
+      </View>
+    </Modal>
   </View>
   );
 }
@@ -166,6 +221,26 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
 
+  helpButtonWrapper: {
+    alignItems: 'center',
+    marginTop: 25,
+  },
+
+  helpButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#afe2ff',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  helpButtonText: {
+    color: '#0a0e1a',
+    fontSize: 22,
+    fontWeight: '900',
+  },
+
   titleContainer: {
     marginTop: 50,
     marginBottom: 40,
@@ -216,6 +291,34 @@ const styles = StyleSheet.create({
     color: '#444',
     fontSize: 14,
     marginTop: 4,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+
+  modalCard: {
+    width: '100%',
+    maxWidth: 420,
+    backgroundColor: '#111827',
+    borderRadius: 20,
+    padding: 14,
+    alignItems: 'center',
+  },
+
+  closeButton: {
+    alignSelf: 'flex-end',
+    marginBottom: 8,
+  },
+
+  tutorialImage: {
+    width: '100%',
+    height: 480,
+    borderRadius: 12,
   },
 
   bottomNav: {
