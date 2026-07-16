@@ -11,7 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
   const menuOptions = [
     {
       title: TITLES[0],
-      subtitle: 'Batallas contra CPU',
+      subtitle: 'Combate contra la CPU o contra otro jugador',
       icon: 'sword-cross',
     },
     {
